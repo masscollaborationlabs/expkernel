@@ -1,35 +1,35 @@
 # Minimal Bootloader + Kernel
 
-Bu proje AGPLv3-or-later lisansı altında yayımlanan, x86 BIOS üzerinde çalışan çok basit bir örnektir:
+This project is a minimal example running on x86 BIOS under the AGPLv3-or-later license:
 
-- `bootloader.S`: GAS (GNU assembler) + Intel syntax ile 512-byte boot sector
-- `kernel_entry.S`: 32-bit giriş noktası
-- `kernel.c`: VGA Mode 13h (`0xA0000`, 320x200x256) ile piksel tabanlı renkli çizim yapar
+- `bootloader.S`: GAS (GNU assembler) + Intel syntax 512-byte boot sector
+- `kernel_entry.S`: 32-bit entry point
+- `kernel.c`: Performs pixel-based colorful drawing with VGA Mode 13h (`0xA0000`, 320x200x256)
 
-Ekranda ortada `HELLO WORLD` ve altında renkli GNU/Tux çizimleri gösterir.
+Displays `HELLO WORLD` in the center of the screen and colorful GNU/Tux drawings below it.
 
-## Gereksinimler
+## Requirements
 
 - GNU assembler (`as`, binutils)
-- `gcc` (32-bit derleme desteği)
+- `gcc` (32-bit compilation support)
 - `ld`, `objcopy` (binutils)
-- `qemu-system-i386` (çalıştırmak için)
+- `qemu-system-i386` (to run)
 
-## Derleme
+## Building
 
 ```bash
 make
 ```
 
-Bu komut `os-image.bin` üretir.
+This command produces `os-image.bin`.
 
-## Çalıştırma
+## Running
 
 ```bash
 make run
 ```
 
-Headless doğrulama (terminalde çıktı görmek için):
+Headless verification (to see output in terminal):
 
 ```bash
 make run-headless
