@@ -29,6 +29,12 @@ Bu komut `os-image.bin` üretir.
 make run
 ```
 
+Doğrudan QEMU komutu:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin
+```
+
 Headless doğrulama (terminalde çıktı görmek için):
 
 ```bash
@@ -64,6 +70,12 @@ Derledikten sonra `make run` komutu QEMU ile önyükleme görüntüsünü otomat
 
 ```bash
 make run
+```
+
+Alternatif olarak doğrudan:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin
 ```
 
 Bu komut GUI penceresiyle QEMU sanal makinesini açar.

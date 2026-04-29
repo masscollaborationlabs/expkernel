@@ -29,6 +29,12 @@ This command produces `os-image.bin`.
 make run
 ```
 
+Direct QEMU command:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin
+```
+
 Headless verification (to see output in terminal):
 
 ```bash
@@ -64,6 +70,12 @@ After building, the `make run` command automatically launches the boot image in 
 
 ```bash
 make run
+```
+
+Alternatively, run directly:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin
 ```
 
 This command opens the QEMU virtual machine with a GUI window.

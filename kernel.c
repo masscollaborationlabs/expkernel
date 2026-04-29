@@ -48,134 +48,299 @@ static void fill_screen(u8 color) {
     }
 }
 
-static void fill_rect(int x, int y, int w, int h, u8 color) {
-    for (int yy = 0; yy < h; ++yy) {
-        for (int xx = 0; xx < w; ++xx) {
-            put_pixel(x + xx, y + yy, color);
-        }
-    }
-}
+static void draw_circle_outline(int cx, int cy, int r, int thickness, u8 color) {
+    const int outer = r * r;
+    const int inner_r = (r - thickness) > 0 ? (r - thickness) : 0;
+    const int inner = inner_r * inner_r;
 
-static void fill_circle(int cx, int cy, int r, u8 color) {
-    const int r2 = r * r;
     for (int y = -r; y <= r; ++y) {
         for (int x = -r; x <= r; ++x) {
-            if (x * x + y * y <= r2) {
+            const int d = x * x + y * y;
+            if (d <= outer && d >= inner) {
                 put_pixel(cx + x, cy + y, color);
             }
         }
     }
 }
 
-static void fill_ellipse(int cx, int cy, int rx, int ry, u8 color) {
-    const int rx2 = rx * rx;
-    const int ry2 = ry * ry;
-    const int rhs = rx2 * ry2;
-    for (int y = -ry; y <= ry; ++y) {
-        for (int x = -rx; x <= rx; ++x) {
-            if ((x * x) * ry2 + (y * y) * rx2 <= rhs) {
-                put_pixel(cx + x, cy + y, color);
-            }
-        }
-    }
-}
+static const u8 MONO16_SPACE[16] = {
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
 
-static const u8 GLYPH_SPACE[7] = {0, 0, 0, 0, 0, 0, 0};
-static const u8 GLYPH_D[7] = {0x1E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1E};
-static const u8 GLYPH_E[7] = {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x1F};
-static const u8 GLYPH_G[7] = {0x0E, 0x11, 0x10, 0x17, 0x11, 0x11, 0x0E};
-static const u8 GLYPH_H[7] = {0x11, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11};
-static const u8 GLYPH_L[7] = {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F};
-static const u8 GLYPH_N[7] = {0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11};
-static const u8 GLYPH_O[7] = {0x0E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E};
-static const u8 GLYPH_R[7] = {0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11};
-static const u8 GLYPH_T[7] = {0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04};
-static const u8 GLYPH_U[7] = {0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E};
-static const u8 GLYPH_W[7] = {0x11, 0x11, 0x11, 0x15, 0x15, 0x1B, 0x11};
-static const u8 GLYPH_X[7] = {0x11, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x11};
+static const u8 MONO16_LPAREN[16] = {
+    0x0C, 0x18, 0x30, 0x30,
+    0x30, 0x30, 0x30, 0x18,
+    0x0C, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
 
-static const u8* glyph_for(char c) {
+static const u8 MONO16_RPAREN[16] = {
+    0x30, 0x18, 0x0C, 0x0C,
+    0x0C, 0x0C, 0x0C, 0x18,
+    0x30, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_0[16] = {
+    0x3C, 0x66, 0x6E, 0x76,
+    0x66, 0x66, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_2[16] = {
+    0x3C, 0x66, 0x06, 0x0C,
+    0x18, 0x30, 0x7E, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_3[16] = {
+    0x3C, 0x66, 0x06, 0x1C,
+    0x06, 0x66, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_6[16] = {
+    0x1C, 0x30, 0x60, 0x7C,
+    0x66, 0x66, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_A[16] = {
+    0x18, 0x3C, 0x66, 0x66,
+    0x7E, 0x66, 0x66, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_C[16] = {
+    0x3C, 0x66, 0x60, 0x60,
+    0x60, 0x66, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_G[16] = {
+    0x3C, 0x66, 0x60, 0x6E,
+    0x66, 0x66, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_L[16] = {
+    0x60, 0x60, 0x60, 0x60,
+    0x60, 0x60, 0x7E, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_P[16] = {
+    0x7C, 0x66, 0x66, 0x66,
+    0x7C, 0x60, 0x60, 0x60,
+    0x60, 0x60, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_S[16] = {
+    0x3C, 0x66, 0x60, 0x60,
+    0x3C, 0x06, 0x06, 0x66,
+    0x3C, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_D[16] = {
+    0x78, 0x6C, 0x66, 0x66,
+    0x66, 0x66, 0x66, 0x6C,
+    0x78, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_X[16] = {
+    0x66, 0x66, 0x3C, 0x18,
+    0x18, 0x3C, 0x66, 0x66,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_DASH[16] = {
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x7E, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_a[16] = {
+    0x00, 0x00, 0x3C, 0x06,
+    0x3E, 0x66, 0x3E, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_e[16] = {
+    0x00, 0x00, 0x3C, 0x66,
+    0x7E, 0x60, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_g[16] = {
+    0x00, 0x00, 0x3C, 0x66,
+    0x66, 0x3E, 0x06, 0x66,
+    0x3C, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_h[16] = {
+    0x60, 0x60, 0x6C, 0x76,
+    0x66, 0x66, 0x66, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_i[16] = {
+    0x18, 0x00, 0x38, 0x18,
+    0x18, 0x18, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_l[16] = {
+    0x38, 0x18, 0x18, 0x18,
+    0x18, 0x18, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_o[16] = {
+    0x00, 0x00, 0x3C, 0x66,
+    0x66, 0x66, 0x3C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_p[16] = {
+    0x00, 0x00, 0x7C, 0x66,
+    0x66, 0x7C, 0x60, 0x60,
+    0x60, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_r[16] = {
+    0x00, 0x00, 0x6C, 0x76,
+    0x60, 0x60, 0x60, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_s[16] = {
+    0x00, 0x00, 0x3E, 0x60,
+    0x3C, 0x06, 0x7C, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_t[16] = {
+    0x10, 0x10, 0x7C, 0x10,
+    0x10, 0x10, 0x0E, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_u[16] = {
+    0x00, 0x00, 0x66, 0x66,
+    0x66, 0x66, 0x3E, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_v[16] = {
+    0x00, 0x00, 0x66, 0x66,
+    0x66, 0x3C, 0x18, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8 MONO16_y[16] = {
+    0x00, 0x00, 0x66, 0x66,
+    0x66, 0x3E, 0x06, 0x66,
+    0x3C, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+static const u8* mono16_glyph_for(char c) {
     switch (c) {
-        case 'D': return GLYPH_D;
-        case 'E': return GLYPH_E;
-        case 'G': return GLYPH_G;
-        case 'H': return GLYPH_H;
-        case 'L': return GLYPH_L;
-        case 'N': return GLYPH_N;
-        case 'O': return GLYPH_O;
-        case 'R': return GLYPH_R;
-        case 'T': return GLYPH_T;
-        case 'U': return GLYPH_U;
-        case 'W': return GLYPH_W;
-        case 'X': return GLYPH_X;
-        default:  return GLYPH_SPACE;
+        case '(': return MONO16_LPAREN;
+        case ')': return MONO16_RPAREN;
+        case '-': return MONO16_DASH;
+        case '0': return MONO16_0;
+        case '2': return MONO16_2;
+        case '3': return MONO16_3;
+        case '6': return MONO16_6;
+        case 'A': return MONO16_A;
+        case 'C': return MONO16_C;
+        case 'G': return MONO16_G;
+        case 'L': return MONO16_L;
+        case 'P': return MONO16_P;
+        case 'S': return MONO16_S;
+        case 'D': return MONO16_D;
+        case 'X': return MONO16_X;
+        case 'a': return MONO16_a;
+        case 'e': return MONO16_e;
+        case 'g': return MONO16_g;
+        case 'h': return MONO16_h;
+        case 'i': return MONO16_i;
+        case 'l': return MONO16_l;
+        case 'o': return MONO16_o;
+        case 'p': return MONO16_p;
+        case 'r': return MONO16_r;
+        case 's': return MONO16_s;
+        case 't': return MONO16_t;
+        case 'u': return MONO16_u;
+        case 'v': return MONO16_v;
+        case 'y': return MONO16_y;
+        default:  return MONO16_SPACE;
     }
 }
 
-static void draw_char(int x, int y, char c, int scale, u8 color) {
-    const u8* glyph = glyph_for(c);
-    for (int row = 0; row < 7; ++row) {
-        for (int col = 0; col < 5; ++col) {
-            if (glyph[row] & (1u << (4 - col))) {
-                fill_rect(x + col * scale, y + row * scale, scale, scale, color);
+static void draw_char_mono16(int x, int y, char c, u8 color) {
+    const u8* glyph = mono16_glyph_for(c);
+    for (int row = 0; row < 16; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            if (glyph[row] & (1u << (7 - col))) {
+                put_pixel(x + col, y + row, color);
             }
         }
     }
 }
 
-static void draw_text_center(int y, const char* text, int scale, u8 color) {
+static void draw_text_center_mono16_at(int y, const char* text, u8 color) {
     const int len = str_len(text);
-    const int char_w = 5 * scale;
-    const int spacing = scale;
-    const int total_w = len > 0 ? (len * (char_w + spacing) - spacing) : 0;
+    const int char_w = 8;
+    const int total_w = len * char_w;
     int x = (WIDTH - total_w) / 2;
+
     for (int i = 0; i < len; ++i) {
-        draw_char(x, y, text[i], scale, color);
-        x += char_w + spacing;
+        draw_char_mono16(x, y, text[i], color);
+        x += char_w;
     }
-}
-
-static void draw_gnu_logo(int cx, int cy) {
-    fill_circle(cx, cy, 28, 55);      
-    fill_circle(cx, cy + 2, 19, 62);  
-    fill_circle(cx - 20, cy - 20, 10, 45);
-    fill_circle(cx + 20, cy - 20, 10, 45);
-    fill_circle(cx - 20, cy - 20, 5, 14);
-    fill_circle(cx + 20, cy - 20, 5, 14);
-    fill_circle(cx - 8, cy - 5, 3, 15);
-    fill_circle(cx + 8, cy - 5, 3, 15);
-    fill_rect(cx - 14, cy + 10, 28, 4, 50);
-    fill_circle(cx - 14, cy + 12, 2, 50);
-    fill_circle(cx + 14, cy + 12, 2, 50);
-    draw_text_center(cy + 38, "GNU", 2, 14);
-}
-
-static void draw_tux_logo(int cx, int cy) {
-    fill_ellipse(cx, cy, 24, 32, 0);
-    fill_ellipse(cx, cy + 2, 15, 22, 63);
-    fill_circle(cx - 8, cy - 10, 3, 15);
-    fill_circle(cx + 8, cy - 10, 3, 15);
-    fill_circle(cx - 8, cy - 10, 1, 0);
-    fill_circle(cx + 8, cy - 10, 1, 0);
-    fill_ellipse(cx, cy - 2, 6, 4, 44);
-    fill_ellipse(cx - 10, cy + 28, 10, 5, 44);
-    fill_ellipse(cx + 10, cy + 28, 10, 5, 44);
-    draw_text_center(cy + 38, "TUX", 2, 14);
 }
 
 void kernel_main(void) {
-    const char* msg = "HELLO WORLD";
+    const char* msg = "PSD X";
+    const char* copyright = "Copyright (C) 2026 PSD Authors";
+    const char* license = "AGPLv3-or-later";
 
-    fill_screen(1);
-
-    for (int y = 0; y < HEIGHT; ++y) {
-        put_pixel((y * 3) % WIDTH, y, 9);
-        put_pixel((WIDTH - 1) - ((y * 2) % WIDTH), y, 17);
-    }
-
-    draw_text_center(32, msg, 3, 15);
-    draw_gnu_logo(110, 122);
-    draw_tux_logo(210, 122);
+    fill_screen(0);
+    draw_circle_outline(WIDTH / 2, 56, 20, 2, 15);
+    draw_text_center_mono16_at(84, msg, 12);
+    draw_text_center_mono16_at(124, copyright, 15);
+    draw_text_center_mono16_at(148, license, 15);
 
     for (int i = 0; msg[i] != '\0'; ++i) {
         if (msg[i] == ' ') {
