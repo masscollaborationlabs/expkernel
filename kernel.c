@@ -2,6 +2,7 @@
  * PSD GNU/Linux
  *
  * Copyright (C) 2026 Mass Collaboration Labs
+ * Copyright (C) 2026 PSD Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -333,7 +334,7 @@ static void draw_text_center_mono16_at(int y, const char* text, u8 color) {
 
 void kernel_main(void) {
     const char* msg = "PSD X";
-    const char* copyright = "Copyright (C) 2026 PSD Authors";
+    const char* copyright = "Copyright (C) 2026 Mass Collaboration Labs\nCopyright (C) 2026 PSD Authors";
     const char* license = "AGPLv3-or-later";
 
     fill_screen(0);

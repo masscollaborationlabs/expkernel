@@ -1,6 +1,7 @@
 # PSD GNU/Linux
 #
 # Copyright (C) 2026 Mass Collaboration Labs
+# Copyright (C) 2026 PSD Authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
