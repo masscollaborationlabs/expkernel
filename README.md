@@ -35,6 +35,74 @@ Headless doğrulama (terminalde çıktı görmek için):
 make run-headless
 ```
 
+## QEMU Sanal Makine Kurulumu
+
+### QEMU Kurulumu
+
+Ubuntu/Debian üzerinde QEMU'yu yüklemek:
+
+```bash
+sudo apt-get update
+sudo apt-get install qemu-system-i386 qemu-utils
+```
+
+Fedora/RHEL üzerinde:
+
+```bash
+sudo dnf install qemu-system-i386
+```
+
+macOS üzerinde (Homebrew kullanarak):
+
+```bash
+brew install qemu
+```
+
+### Sanal Makineyi Çalıştırma
+
+Derledikten sonra `make run` komutu QEMU ile önyükleme görüntüsünü otomatik olarak başlatır:
+
+```bash
+make run
+```
+
+Bu komut GUI penceresiyle QEMU sanal makinesini açar.
+
+### İleri QEMU Seçenekleri
+
+Terminalde çalıştırmak (GUI olmadan):
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin -curses
+```
+
+Bellek ve CPU ayarlamak:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin -m 256 -smp 2
+```
+
+GDB debugger ile bağlanmak:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin -s -S
+```
+
+(Başka bir terminalden: `gdb`, sonra `target remote localhost:1234`)
+
+### Sorun Giderme
+
+**QEMU bulunamıyor:**
+```bash
+which qemu-system-i386
+```
+
+**32-bit desteği yok:**
+Sistem 32-bit desteği olmadan geliyorsa, `-cpu Nehalem` veya benzer seçenekler ekleyebilirsiniz.
+
+**Görüntü açılmıyor:**
+`-display gtk` veya `-display sdl` seçenekleri ile farklı görüntü backendleri deneyin.
+
 ## License
 
 PSD GNU/Linux 

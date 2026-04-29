@@ -35,6 +35,74 @@ Headless verification (to see output in terminal):
 make run-headless
 ```
 
+## QEMU Virtual Machine Setup
+
+### Installing QEMU
+
+On Ubuntu/Debian:
+
+```bash
+sudo apt-get update
+sudo apt-get install qemu-system-i386 qemu-utils
+```
+
+On Fedora/RHEL:
+
+```bash
+sudo dnf install qemu-system-i386
+```
+
+On macOS (using Homebrew):
+
+```bash
+brew install qemu
+```
+
+### Running the Virtual Machine
+
+After building, the `make run` command automatically launches the boot image in QEMU:
+
+```bash
+make run
+```
+
+This command opens the QEMU virtual machine with a GUI window.
+
+### Advanced QEMU Options
+
+Run in terminal (without GUI):
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin -curses
+```
+
+Adjust memory and CPU:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin -m 256 -smp 2
+```
+
+Attach GDB debugger:
+
+```bash
+qemu-system-i386 -drive format=raw,file=os-image.bin -s -S
+```
+
+(From another terminal: `gdb`, then `target remote localhost:1234`)
+
+### Troubleshooting
+
+**QEMU not found:**
+```bash
+which qemu-system-i386
+```
+
+**No 32-bit support:**
+If your system lacks 32-bit support, try adding `-cpu Nehalem` or similar options.
+
+**Display not opening:**
+Try different display backends with `-display gtk` or `-display sdl`.
+
 ## License
 
 PSD GNU/Linux 
