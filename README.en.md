@@ -6,7 +6,7 @@ This project is a minimal example running on x86 BIOS under the AGPLv3-or-later 
 - `kernel_entry.S`: 32-bit entry point
 - `kernel.c`: Performs pixel-based colorful drawing with VGA Mode 13h (`0xA0000`, 320x200x256)
 
-Displays `HELLO WORLD` in the center of the screen and colorful GNU/Tux drawings below it.
+At the top of the screen, it displays `PSD X` inside a circle, with `PSD Authors` and `AGPLv3-or-later` shown below it.
 
 ## Requirements
 

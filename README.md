@@ -6,7 +6,7 @@ Bu proje AGPLv3-or-later lisansı altında yayımlanan, x86 BIOS üzerinde çal�
 - `kernel_entry.S`: 32-bit giriş noktası
 - `kernel.c`: VGA Mode 13h (`0xA0000`, 320x200x256) ile piksel tabanlı renkli çizim yapar
 
-Ekranda ortada `HELLO WORLD` ve altında renkli GNU/Tux çizimleri gösterir.
+Ekranın en üstünde çember içinde `PSD X`, onun altında `PSD Authors` ve `AGPLv3-or-later` yazılarını gösterir.
 
 ## Gereksinimler
 
