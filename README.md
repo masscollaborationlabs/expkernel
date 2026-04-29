@@ -120,6 +120,7 @@ Sistem 32-bit desteği olmadan geliyorsa, `-cpu Nehalem` veya benzer seçenekler
 PSD GNU/Linux 
 
 Copyright (C) 2026 Mass Collaboration Labs
+
 Copyright (C) 2026 PSD Authors
 
 This program is free software: you can redistribute it and/or modify
